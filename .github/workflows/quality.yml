@@ -38,3 +38,7 @@ jobs:
               py_compile.compile(str(file), doraise=True)
           print(f"Compiled {len(files)} Python files.")
           PY
+      - name: Test synthetic lab data
+        run: python -m unittest discover -s usecases/UC01/tests -v
+      - name: Validate JSON policy examples
+        run: python -m json.tool usecases/UC01/iam/uc01-upload-policy.json > /dev/null
