@@ -13,9 +13,14 @@
       }
     },
     {
-      "Sid": "UploadOnlyToLandingPrefix",
+      "Sid": "UploadAndVerifyOnlyLandingPrefix",
       "Effect": "Allow",
-      "Action": ["s3:PutObject", "s3:AbortMultipartUpload"],
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts"
+      ],
       "Resource": "arn:aws:s3:::REPLACE_WITH_BUCKET_NAME/landing/loan_demo/*"
     }
   ]
