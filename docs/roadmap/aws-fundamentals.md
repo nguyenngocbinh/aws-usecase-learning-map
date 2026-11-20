@@ -1,0 +1,56 @@
+# AWS Fundamentals
+
+Trang này là checklist nền tảng trước khi triển khai các use case. Thực hiện trên AWS learning account riêng.
+
+## Account, Region và Availability Zone
+
+- **AWS account:** ranh giới quản trị, billing và quota.
+- **Region:** khu vực địa lý chứa các AWS resources.
+- **Availability Zone (AZ):** vị trí hạ tầng độc lập trong một Region.
+- Chọn Region dựa trên latency, data residency, service availability và chi phí; không mặc định mọi dịch vụ có mặt ở mọi Region.
+
+```mermaid
+flowchart TB
+  A["AWS Account"] --> R1["Region A"]
+  A --> R2["Region B"]
+  R1 --> AZ1["AZ A"]
+  R1 --> AZ2["AZ B"]
+  R1 --> AZ3["AZ C"]
+```
+
+## IAM và nguyên tắc least privilege
+
+- Ưu tiên IAM Identity Center/federation và temporary credentials.
+- Dùng IAM role cho workload và GitHub Actions OIDC.
+- Tránh root user cho công việc hàng ngày; bật MFA.
+- Không cấp `AdministratorAccess` cho lab nếu quyền hẹp hơn là đủ.
+- Review trust policy, permissions policy và resource policy.
+
+## AWS CLI
+
+Cài AWS CLI v2 từ [hướng dẫn chính thức](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+
+Kiểm tra phiên bản:
+
+```bash
+aws --version
+aws sts get-caller-identity
+```
+
+Không paste access key vào terminal history, notebook hoặc repository.
+
+## Cost management trước khi làm lab
+
+- Thiết lập AWS Budgets và billing alarms.
+- Chọn Region và instance/storage tier phù hợp.
+- Ghi rõ runtime dự kiến; tắt/xóa endpoint, database, NAT Gateway và tài nguyên tính phí theo giờ khi không sử dụng.
+- Kiểm tra chi phí thực tế trong Billing/Cost Explorer; free tier không đồng nghĩa mọi thành phần đều miễn phí.
+
+## Checklist
+
+- [ ] MFA đã bật cho identity quản trị.
+- [ ] Có learning role riêng với quyền tối thiểu.
+- [ ] Đã chọn Region và xác nhận service availability.
+- [ ] Đã thiết lập budget/billing alert.
+- [ ] Đã kiểm tra AWS CLI identity.
+- [ ] Hiểu cleanup và trách nhiệm chi phí.
