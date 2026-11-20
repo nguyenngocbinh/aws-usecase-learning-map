@@ -1,0 +1,40 @@
+name: Documentation and code quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install docs dependencies
+        run: pip install -r requirements-docs.txt
+      - name: Build documentation
+        run: mkdocs build --strict
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile Python sources
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import py_compile
+          files = list(Path("usecases").rglob("*.py"))
+          for file in files:
+              py_compile.compile(str(file), doraise=True)
+          print(f"Compiled {len(files)} Python files.")
+          PY
