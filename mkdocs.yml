@@ -1,0 +1,113 @@
+site_name: AWS Use Case Learning Map
+site_description: Học AWS qua 12 use case thực tế — Data Platform, Machine Learning, DevOps, Operations và Security.
+site_author: nguyenngocbinh
+site_url: https://nguyenngocbinh.github.io/aws-usecase-learning-map/
+repo_url: https://github.com/nguyenngocbinh/aws-usecase-learning-map
+repo_name: nguyenngocbinh/aws-usecase-learning-map
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: vi
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - toc.follow
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/weather-night
+        name: Chuyển sang giao diện tối
+    - scheme: slate
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/weather-sunny
+        name: Chuyển sang giao diện sáng
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/nguyenngocbinh/aws-usecase-learning-map
+
+extra_css:
+  - assets/stylesheets/extra.css
+
+nav:
+  - Trang chủ: index.md
+  - Lộ trình:
+      - Tổng quan: roadmap/index.md
+      - AWS Fundamentals: roadmap/aws-fundamentals.md
+      - Quy tắc thực hành & chi phí: roadmap/lab-safety-cost.md
+  - A · Data Platform:
+      - UC01 · Upload dữ liệu: usecases/data-platform/uc01-upload-data.md
+      - UC02 · Data Lake & ETL: usecases/data-platform/uc02-data-lake-etl.md
+      - UC03 · Database Migration: usecases/data-platform/uc03-database-migration.md
+  - B · Machine Learning:
+      - UC04 · Model Training: usecases/machine-learning/uc04-model-training.md
+      - UC05 · Model API: usecases/machine-learning/uc05-model-api.md
+      - UC06 · Batch Scoring: usecases/machine-learning/uc06-batch-scoring.md
+  - C · DevOps:
+      - UC07 · GitHub → AWS: usecases/devops/uc07-github-aws.md
+      - UC08 · GitLab → AWS: usecases/devops/uc08-gitlab-aws.md
+      - UC09 · CI/CD: usecases/devops/uc09-cicd.md
+  - D · Operations:
+      - UC10 · Scheduling: usecases/operations/uc10-scheduling.md
+      - UC11 · Monitoring: usecases/operations/uc11-monitoring.md
+  - E · Security:
+      - UC12 · Security, Backup & DR: usecases/security/uc12-security-backup-dr.md
+  - Kiến thức AWS:
+      - Dịch vụ AWS: aws-services/index.md
+      - So sánh lựa chọn: comparisons/index.md
+      - Glossary: glossary.md
+  - Project:
+      - Todos: project/todos.md
+      - Nguồn tham khảo & hình ảnh: project/references.md
+      - Đóng góp: project/contributing.md
+
+copyright: Copyright &copy; 2026 AWS Use Case Learning Map
