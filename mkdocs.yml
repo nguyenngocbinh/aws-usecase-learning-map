@@ -103,11 +103,14 @@ nav:
       - UC12 · Security, Backup & DR: usecases/security/uc12-security-backup-dr.md
   - Kiến thức AWS:
       - Dịch vụ AWS: aws-services/index.md
+      - Amazon S3: aws-services/s3.md
+      - IAM: aws-services/iam.md
       - So sánh lựa chọn: comparisons/index.md
       - Glossary: glossary.md
   - Project:
       - Todos: project/todos.md
       - Nguồn tham khảo & hình ảnh: project/references.md
+      - UC01 visual guide: project/uc01-image-guide.md
       - Đóng góp: project/contributing.md
 
 copyright: Copyright &copy; 2026 AWS Use Case Learning Map
