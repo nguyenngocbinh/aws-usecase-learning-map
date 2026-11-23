@@ -25,7 +25,7 @@ Tài liệu hướng dẫn thực hành bước đầu để lưu dữ liệu tr
 1. Đọc [Amazon S3 service guide](../../docs/aws-services/s3.md).
 2. Đọc [Amazon Athena service guide](../../docs/aws-services/athena.md).
 3. Tạo Workgroup uc02-learning và cấu hình query result location.
-4. Thay <bucket-name> trong file SQL bằng tên bucket thực tế.
+4. Thay `<bucket-name>` trong file SQL bằng tên bucket thực tế.
 5. Chạy sql/01_athena_create_database_and_csv_table.sql.
 6. Chạy sql/02_athena_ctas_parquet.sql.
 7. So sánh query details/bytes scanned giữa CSV và Parquet.
