@@ -132,7 +132,7 @@ Không dùng chung Workgroup production. Workgroup giúp tách cấu hình, lị
 
 ### Lab 03 — Tạo Glue Data Catalog database và external table
 
-Chọn Workgroup **uc02-learning**, mở Query editor và chạy SQL dưới đây. Thay <bucket-name> bằng tên bucket thật.
+Chọn Workgroup **uc02-learning**, mở Query editor và chạy SQL dưới đây. Thay `&lt;bucket-name&gt;` bằng tên bucket thật.
 
 ~~~sql
 CREATE DATABASE IF NOT EXISTS uc02_learning;
