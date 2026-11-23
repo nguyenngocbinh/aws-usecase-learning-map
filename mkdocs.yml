@@ -82,6 +82,7 @@ nav:
   - Trang chủ: index.md
   - Lộ trình:
       - Tổng quan: roadmap/index.md
+      - Lộ trình học từ UAT: roadmap/uat-reference-learning-path.md
       - AWS Fundamentals: roadmap/aws-fundamentals.md
       - Quy tắc thực hành & chi phí: roadmap/lab-safety-cost.md
   - Kiến trúc tham chiếu:
@@ -104,6 +105,8 @@ nav:
       - UC11 · Monitoring: usecases/operations/uc11-monitoring.md
   - E · Security:
       - UC12 · Security, Backup & DR: usecases/security/uc12-security-backup-dr.md
+  - Kiến trúc tham chiếu:
+      - AWS UAT v1.6: architecture/tpbank-uat-reference.md
   - Kiến thức AWS:
       - Dịch vụ AWS: aws-services/index.md
       - Amazon S3: aws-services/s3.md
