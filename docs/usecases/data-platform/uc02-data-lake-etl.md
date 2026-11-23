@@ -1,6 +1,6 @@
 # UC02 — Xây dựng Data Lake và ETL
 
-> **UC02 · DATA PLATFORM · PLANNED**
+> **UC02 · DATA PLATFORM · IN PROGRESS**
 
 ## 1. Business scenario
 Xây data lake nhiều zone và ETL có catalog, query, orchestration, kiểm soát quyền và chi phí.
@@ -26,10 +26,10 @@ flowchart LR
 > Sơ đồ này là bản khái niệm. Bản hoàn thiện cần thể hiện VPC/subnet, endpoints, encryption, IAM trust, network path, error handling và service-specific boundaries theo lab thực tế.
 
 ## 4. AWS service selection
-- **Amazon S3** — đánh giá vai trò và cấu hình phù hợp trong lab.
-- **AWS Glue** — đánh giá vai trò và cấu hình phù hợp trong lab.
-- **Glue Data Catalog** — đánh giá vai trò và cấu hình phù hợp trong lab.
-- **Athena** — đánh giá vai trò và cấu hình phù hợp trong lab.
+- **Amazon S3** — lưu trữ Raw/Curated Zone, object layout, security, lifecycle và cost. Xem [S3 service guide](../../aws-services/s3.md).
+- **AWS Glue Data Catalog** — lưu metadata database/table/schema/location; lab hiện tại tạo Catalog database/table qua Athena DDL.
+- **Amazon Athena** — query SQL trực tiếp trên S3, Workgroup, CSV external table và CTAS Parquet. Xem [Athena service guide](../../aws-services/athena.md).
+- **AWS Glue ETL, Lambda, Step Functions và Lake Formation** — sẽ triển khai ở các lab mở rộng tiếp theo.
 - **Lambda** — đánh giá vai trò và cấu hình phù hợp trong lab.
 - **Step Functions** — đánh giá vai trò và cấu hình phù hợp trong lab.
 - **Lake Formation** — đánh giá vai trò và cấu hình phù hợp trong lab.
@@ -48,7 +48,7 @@ flowchart LR
 | What if | Failure modes, limits, recovery và troubleshooting? |
 | How compared | So với alternative nào, trade-off ra sao? |
 
-**Status:** chưa hoàn thành cho đến khi có câu trả lời theo từng dịch vụ và dẫn nguồn AWS chính thức.
+**Status:** S3 và Athena đã có service guide riêng với 10 WH, alternatives, pricing drivers, security, troubleshooting và official references. Các service còn lại sẽ được hoàn thiện theo từng lab.
 
 ## 5. Alternatives and decision matrix
 | Choice | When to consider | Trade-offs to validate |
@@ -65,15 +65,24 @@ flowchart LR
 - Xác nhận Region, quota, service availability và IAM permissions.
 
 ## 7. Hands-on labs
-| Lab | Nội dung | Status |
-|---|---|---|
-| Lab 01 | Prepare account, identity, variables and prerequisites | Planned |
-| Lab 02 | Build the minimum architecture | Planned |
-| Lab 03 | Implement the main workflow | Planned |
-| Lab 04 | Validate output and failure cases | Planned |
-| Lab 05 | Observe, secure, estimate cost and clean up | Planned |
 
-Mỗi lab hoàn chỉnh phải có mục tiêu, prerequisites, Console steps và screenshots, CLI/SDK code, Terraform nếu phù hợp, expected output, troubleshooting, rollback, cost và cleanup.
+| Lab | Nội dung | Trạng thái |
+|---|---|---|
+| Lab 01 | Chuẩn bị learning account, IAM identity, Region và S3 bucket | Có hướng dẫn trong UC01 |
+| Lab 02 | Upload synthetic CSV lên S3 Raw Zone | Có hướng dẫn và code trong UC01 |
+| Lab 03 | Tạo Athena Workgroup và Glue Data Catalog database/table | Có hướng dẫn SQL |
+| Lab 04 | Query, aggregation và Data Quality checks bằng Athena SQL | Có SQL examples |
+| Lab 05 | Dùng CTAS chuyển CSV sang Parquet; kiểm tra bytes scanned, security và cleanup | Có SQL examples; cần chạy xác minh trên AWS account |
+
+### Tài liệu và mã nguồn
+
+- [Amazon S3 service guide](../../aws-services/s3.md)
+- [Amazon Athena service guide](../../aws-services/athena.md)
+- [UC02 README và run order](https://github.com/nguyenngocbinh/aws-usecase-learning-map/blob/feature/s3-athena-hands-on/usecases/UC02/README.md)
+- [SQL 01 — Create database và CSV external table](https://github.com/nguyenngocbinh/aws-usecase-learning-map/blob/feature/s3-athena-hands-on/usecases/UC02/sql/01_athena_create_database_and_csv_table.sql)
+- [SQL 02 — CTAS Parquet](https://github.com/nguyenngocbinh/aws-usecase-learning-map/blob/feature/s3-athena-hands-on/usecases/UC02/sql/02_athena_ctas_parquet.sql)
+
+**Giới hạn xác minh:** tài liệu và SQL assets đã được chuẩn bị trong repository; chưa có xác nhận đã deploy hoặc chạy trên AWS account thật. Chưa có ảnh chụp màn hình Console thực tế.
 
 ## 8. Code and infrastructure
 Mã nguồn thực hành được tổ chức trong `usecases/UC02/`:

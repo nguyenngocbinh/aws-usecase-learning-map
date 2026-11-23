@@ -104,6 +104,7 @@ nav:
   - Kiến thức AWS:
       - Dịch vụ AWS: aws-services/index.md
       - Amazon S3: aws-services/s3.md
+      - Amazon Athena: aws-services/athena.md
       - IAM: aws-services/iam.md
       - So sánh lựa chọn: comparisons/index.md
       - Glossary: glossary.md
