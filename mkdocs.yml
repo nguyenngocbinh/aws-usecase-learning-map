@@ -87,7 +87,6 @@ nav:
       - Quy tắc thực hành & chi phí: roadmap/lab-safety-cost.md
   - Kiến trúc tham chiếu:
       - AWS UAT v1.6: architecture/tpbank-uat-reference.md
-      - Lộ trình học từ UAT: roadmap/uat-reference-learning-path.md
   - A · Data Platform:
       - UC01 · Upload dữ liệu: usecases/data-platform/uc01-upload-data.md
       - UC02 · Data Lake & ETL: usecases/data-platform/uc02-data-lake-etl.md
