@@ -122,3 +122,18 @@ Each use case must contain: business scenario, prerequisites, architecture, data
 - [ ] Every billable lab lists cleanup commands and possible residual charges.
 - [ ] No secrets, real customer data, or non-public banking information are committed.
 - [ ] All internal links and the strict documentation build pass.
+
+
+## UC01 — S3 upload implementation status
+
+- [x] Write Vietnamese lesson covering architecture, 10 WH for S3/IAM/CLI/Boto3/KMS/CloudTrail, alternatives, cost, security and cleanup.
+- [x] Add editable Mermaid architecture and trust-boundary diagrams.
+- [x] Add synthetic CSV dataset and Boto3 upload/verification scripts.
+- [x] Add prefix-scoped IAM policy example.
+- [x] Add Terraform private bucket baseline (public access block, ownership controls, versioning, SSE-S3, TLS-only bucket policy).
+- [x] Add S3 and IAM service guides.
+- [x] Add CI checks for Python compilation, sample CSV tests and IAM JSON validation.
+- [ ] Run AWS lab in a dedicated learning account and capture redacted real console screenshots.
+- [ ] Verify Terraform plan/apply/destroy in the selected Region.
+- [ ] Verify cost and cleanup after execution.
+- [ ] Mark UC01 Lab verified only after the above checks pass.

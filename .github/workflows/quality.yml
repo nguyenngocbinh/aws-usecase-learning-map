@@ -38,3 +38,23 @@ jobs:
               py_compile.compile(str(file), doraise=True)
           print(f"Compiled {len(files)} Python files.")
           PY
+      - name: Test synthetic lab data
+        run: python -m unittest discover -s usecases/UC01/tests -v
+      - name: Validate JSON policy examples
+        run: python -m json.tool usecases/UC01/iam/uc01-upload-policy.json > /dev/null
+
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Format Terraform files
+        working-directory: usecases/UC01/infrastructure/terraform
+        run: terraform fmt -recursive
+      - name: Initialize providers without backend
+        working-directory: usecases/UC01/infrastructure/terraform
+        run: terraform init -backend=false -input=false
+      - name: Validate Terraform
+        working-directory: usecases/UC01/infrastructure/terraform
+        run: terraform validate
