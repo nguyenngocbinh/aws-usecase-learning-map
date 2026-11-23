@@ -78,7 +78,7 @@ flowchart LR
 
 - [Amazon S3 service guide](../../aws-services/s3.md)
 - [Amazon Athena service guide](../../aws-services/athena.md)
-- [UC02 README và run order](../../../usecases/UC02/README.md)
+- [UC02 README và run order](https://github.com/nguyenngocbinh/aws-usecase-learning-map/blob/feature/s3-athena-hands-on/usecases/UC02/README.md)
 - [SQL 01 — Create database và CSV external table](https://github.com/nguyenngocbinh/aws-usecase-learning-map/blob/feature/s3-athena-hands-on/usecases/UC02/sql/01_athena_create_database_and_csv_table.sql)
 - [SQL 02 — CTAS Parquet](https://github.com/nguyenngocbinh/aws-usecase-learning-map/blob/feature/s3-athena-hands-on/usecases/UC02/sql/02_athena_ctas_parquet.sql)
 
