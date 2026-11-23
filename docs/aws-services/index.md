@@ -2,6 +2,11 @@
 
 Danh mục dịch vụ sẽ được mở rộng theo use case. Mỗi service guide phải có đủ 10 WH questions, decision criteria, alternatives, architecture examples, pricing drivers, operational limits, and official references.
 
+## New detailed guides
+
+- [Amazon S3](s3.md) — 10 WH, storage/security options, alternatives and CLI.
+- [Amazon Athena](athena.md) — 10 WH, Workgroup, SQL/CTAS, cost and troubleshooting.
+
 ## First-wave services
 
 | Service | Domain | Primary use |

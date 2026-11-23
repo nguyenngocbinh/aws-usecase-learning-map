@@ -82,8 +82,11 @@ nav:
   - Trang chủ: index.md
   - Lộ trình:
       - Tổng quan: roadmap/index.md
+      - Lộ trình học từ UAT: roadmap/uat-reference-learning-path.md
       - AWS Fundamentals: roadmap/aws-fundamentals.md
       - Quy tắc thực hành & chi phí: roadmap/lab-safety-cost.md
+  - Kiến trúc tham chiếu:
+      - AWS UAT v1.6: architecture/tpbank-uat-reference.md
   - A · Data Platform:
       - UC01 · Upload dữ liệu: usecases/data-platform/uc01-upload-data.md
       - UC02 · Data Lake & ETL: usecases/data-platform/uc02-data-lake-etl.md
@@ -101,6 +104,8 @@ nav:
       - UC11 · Monitoring: usecases/operations/uc11-monitoring.md
   - E · Security:
       - UC12 · Security, Backup & DR: usecases/security/uc12-security-backup-dr.md
+  - Kiến trúc tham chiếu:
+      - AWS UAT v1.6: architecture/tpbank-uat-reference.md
   - Kiến thức AWS:
       - Dịch vụ AWS: aws-services/index.md
       - Amazon S3: aws-services/s3.md
@@ -109,6 +114,7 @@ nav:
       - So sánh lựa chọn: comparisons/index.md
       - Glossary: glossary.md
   - Project:
+      - Mapping tài liệu UAT: project/tpbank-uat-mapping.md
       - Todos: project/todos.md
       - Nguồn tham khảo & hình ảnh: project/references.md
       - UC01 visual guide: project/uc01-image-guide.md

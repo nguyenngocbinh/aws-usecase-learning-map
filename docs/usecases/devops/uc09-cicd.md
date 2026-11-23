@@ -1,110 +1,293 @@
-# UC09 — Xây dựng CI/CD tự động
+# UC09 — CI/CD cho AWS Infrastructure và Workload
 
-> **UC09 · DEVOPS · PLANNED**
+> **UC09 · DEVOPS · HANDS-ON GUIDE**
+>
+> Tổng hợp pattern Terraform/GitLab CI/CD trong tài liệu AWS UAT v1.6 và mở rộng sang GitHub OIDC. UAT dùng GitLab Runner/ECS trong Shared Services; nội dung dưới đây là hướng dẫn độc lập, không sử dụng thông tin nội bộ.
 
 ## 1. Business scenario
-Thiết kế pipeline test, build artifact/container, scan, deploy theo môi trường và rollback.
 
-## 2. Learning objectives
-- Giải thích bài toán, dữ liệu đầu vào/đầu ra và yêu cầu vận hành.
-- Đọc và thiết kế được kiến trúc AWS, data flow và trust boundaries.
-- Chọn dịch vụ theo workload, security, availability, operations và cost.
-- Triển khai bằng Console, CLI/SDK và IaC khi phù hợp.
-- Kiểm thử, xử lý lỗi, quan sát hệ thống và dọn dẹp tài nguyên.
+Platform team cần quản lý AWS infrastructure bằng code, review thay đổi qua Git, tự động validation/security checks, tạo Terraform plan, yêu cầu approval trước apply và audit/rollback.
 
-## 3. Reference architecture
-```mermaid
+## 2. Reference pipeline
+
+~~~mermaid
+flowchart TD
+  DEV["Developer Push / Pull Request"] --> LINT["Format + Validate + Tests"]
+  LINT --> SEC["Security Scan"]
+  SEC --> PLAN["Terraform Plan"]
+  PLAN --> REVIEW["Code Review / Plan Review"]
+  REVIEW --> APPROVE{"Protected Environment Approval"}
+  APPROVE -->|Approved| APPLY["Terraform Apply"]
+  APPROVE -->|Rejected| STOP["Stop Pipeline"]
+  APPLY --> VERIFY["Post-deploy Validation"]
+  VERIFY --> AUDIT["Deployment Record / CloudTrail"]
+~~~
+
+## 3. Design decisions
+
+| Decision | Starting point | Trade-off |
+|---|---|---|
+| Repository | GitHub or GitLab | Theo source control standard |
+| AWS authentication | OIDC federation | Cần trust conditions/provider |
+| Terraform state | S3 remote backend | Bootstrap và backend permissions |
+| Environments | Separate role/state boundaries | Nhiều cấu hình nhưng giảm blast radius |
+| Validation | fmt, validate, TFLint, Trivy | Tool maintenance/false positives |
+| Deployment | Reviewed plan artifact | Cần kiểm soát artifact lifecycle |
+| Production approval | Protected environment/manual gate | Human control và latency |
+
+## 4. Cross-account architecture
+
+~~~mermaid
 flowchart LR
-  A["Source / Trigger"] --> B["AWS ingestion / integration"]
-  B --> C["Git provider / CI"]
-  C --> D["Processing / Workload"]
-  D --> E["Output / Validation"]
-  D -. telemetry .-> F["CloudWatch / Audit"]
-```
-**Logical flow:** Commit → test → build → security checks → approval → deploy → smoke test.
+  subgraph SCM["Git Provider"]
+    REPO["Repository"]
+    PIPE["CI Pipeline"]
+  end
+  subgraph TOOL["Tools / Shared Services"]
+    RUN["Hosted Runner or ECS Runner"]
+    STATE[("S3 Terraform State")]
+  end
+  subgraph TARGET["Target AWS Account"]
+    OIDC["OIDC Provider / STS"]
+    ROLE["Deployment IAM Role"]
+    RES["AWS Resources"]
+  end
+  REPO --> PIPE --> RUN
+  RUN -->|OIDC JWT| OIDC
+  OIDC -->|AssumeRoleWithWebIdentity| ROLE
+  ROLE --> RES
+  RUN --> STATE
+~~~
 
-> Sơ đồ này là bản khái niệm. Bản hoàn thiện cần thể hiện VPC/subnet, endpoints, encryption, IAM trust, network path, error handling và service-specific boundaries theo lab thực tế.
+UAT v1.6 mô tả ECS GitLab Runner manager/worker trong Shared Services; worker assume target role qua `sts:AssumeRole` và `ExternalId`. Nếu Git provider hỗ trợ OIDC, đánh giá federation trực tiếp để tránh giữ AWS access key dài hạn.
 
-## 4. AWS service selection
-- **GitHub Actions** — đánh giá vai trò và cấu hình phù hợp trong lab.
-- **GitLab CI** — đánh giá vai trò và cấu hình phù hợp trong lab.
-- **CodePipeline** — đánh giá vai trò và cấu hình phù hợp trong lab.
-- **CodeBuild** — đánh giá vai trò và cấu hình phù hợp trong lab.
-- **ECR** — đánh giá vai trò và cấu hình phù hợp trong lab.
-- **ECS** — đánh giá vai trò và cấu hình phù hợp trong lab.
-- **Terraform** — đánh giá vai trò và cấu hình phù hợp trong lab.
+## 5. Pipeline stages
 
-### 10 WH questions — áp dụng cho từng service
-| WH | Câu hỏi bắt buộc |
-|---|---|
-| What | Dịch vụ là gì, giải quyết capability nào? |
-| Why | Vì sao chọn dịch vụ cho scenario này? |
-| When | Trường hợp nào nên/không nên dùng? |
-| Where | Region, AZ, network placement và availability ra sao? |
-| Who | Ai vận hành, IAM principal nào cần quyền? |
-| Which | Nên chọn mode, tier hoặc configuration nào? |
-| How | Triển khai bằng Console, CLI, SDK và IaC thế nào? |
-| How much | Pricing dimensions và cost drivers là gì? |
-| What if | Failure modes, limits, recovery và troubleshooting? |
-| How compared | So với alternative nào, trade-off ra sao? |
+### Stage 1 — Validate
 
-**Status:** chưa hoàn thành cho đến khi có câu trả lời theo từng dịch vụ và dẫn nguồn AWS chính thức.
+~~~bash
+terraform fmt -check -recursive
+terraform init -backend=false
+terraform validate
+~~~
 
-## 5. Alternatives and decision matrix
-| Choice | When to consider | Trade-offs to validate |
+### Stage 2 — Lint and security
+
+~~~bash
+tflint --recursive
+trivy config --severity HIGH,CRITICAL .
+~~~
+
+Pin tool versions và review security exceptions.
+
+### Stage 3 — Plan
+
+~~~bash
+terraform init -backend-config=environments/uat/backend.hcl
+terraform workspace select uat || terraform workspace new uat
+terraform plan -var-file=environments/uat/terraform.tfvars -out=tfplan
+terraform show -no-color tfplan
+~~~
+
+Review create/update/delete. Bảo vệ `tfplan`, plan JSON và state như artifacts nhạy cảm; giới hạn download, expiry ngắn và không expose secrets.
+
+### Stage 4 — Approval and apply
+
+~~~bash
+terraform apply tfplan
+~~~
+
+Apply đúng plan artifact đã review. Production sử dụng protected branch/environment, approvers và audit.
+
+### Stage 5 — Post-deployment
+
+- Kiểm tra resource state và health checks.
+- Kiểm tra CloudTrail deployment principal/actions.
+- Kiểm tra logs/metrics/alarms.
+- Ghi commit SHA, pipeline run, workspace/account/Region và plan artifact hash.
+- Có rollback/recovery plan theo từng resource/service.
+
+## 6. GitHub Actions — OIDC skeleton
+
+Cần cấu hình IAM OIDC provider và role trust policy ở AWS trước. Trust policy minh họa; thay placeholder theo repository, environment và account thực tế:
+
+~~~json
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Sid": "GitHubActionsOIDC",
+    "Effect": "Allow",
+    "Principal": {
+      "Federated": "arn:aws:iam::<AWS_ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com"
+    },
+    "Action": "sts:AssumeRoleWithWebIdentity",
+    "Condition": {
+      "StringEquals": {
+        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+      },
+      "StringLike": {
+        "token.actions.githubusercontent.com:sub": "repo:<GITHUB_OWNER>/<GITHUB_REPO>:environment:uat"
+      }
+    }
+  }]
+}
+~~~
+
+Workflow skeleton:
+
+~~~yaml
+name: terraform-uat
+on:
+  pull_request:
+    paths: ["infrastructure/**"]
+  push:
+    branches: [main]
+    paths: ["infrastructure/**"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.13.5"
+      - run: terraform -chdir=infrastructure/terraform fmt -check -recursive
+      - run: terraform -chdir=infrastructure/terraform init -backend=false
+      - run: terraform -chdir=infrastructure/terraform validate
+  plan:
+    needs: validate
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.13.5"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_UAT_ROLE_ARN }}
+          aws-region: ap-southeast-1
+      - run: aws sts get-caller-identity
+      - run: |
+          terraform -chdir=infrastructure/terraform init
+          terraform -chdir=infrastructure/terraform plan -var-file=environments/uat/terraform.tfvars
+~~~
+
+Đây là skeleton học tập. Production phải pin GitHub Actions bằng full commit SHA, giới hạn trust `sub` theo repo/environment/branch, bật Environment protection và không cấp AWS credentials cho untrusted fork code. Không dùng `pull_request_target` để chạy code không tin cậy với quyền AWS.
+
+## 7. GitLab CI — pattern theo tài liệu UAT
+
+Tài liệu UAT v1.6 tổ chức:
+
+~~~text
+.gitlab-ci.yml
+cicd/
+  jobs.yml
+  rules.yml
+  pipeline.yml
+~~~
+
+- `jobs.yml`: reusable hidden jobs qua `!reference`.
+- `rules.yml`: điều kiện trigger theo branch/event.
+- `pipeline.yml`: dynamic pipeline generator.
+- `.gitlab-ci.yml`: entrypoint, stages, variables và child pipeline trigger.
+
+Các stage được mô tả: **Terraform Plan → Compliance Check → Deploy**. Variables tham chiếu: `TF_VERSION`, `TF_CURRENT_WORKSPACE`, `TF_BACKEND_FILE`, `TF_VAR_FILE`, `ASSUME_ROLE_ARN`, `EXTERNAL_ID`, `ENVS`.
+
+Authentication models:
+- **OIDC federation:** GitLab ID token → `AssumeRoleWithWebIdentity`; trust condition giới hạn project/ref/audience.
+- **Runner role → AssumeRole:** runner task role được target role trust; giới hạn ExternalId và policy scope.
+
+Không trộn hai model vô thức. Tránh lưu AWS access keys dài hạn trong CI variables.
+
+## 8. Terraform remote state
+
+UAT v1.6 tạo S3 bucket riêng tại Shared Services, bật versioning, yêu cầu TLS và cấp quyền cho deployment roles. Với Terraform hiện hành, xác minh locking support và cú pháp backend theo version đang dùng.
+
+~~~hcl
+bucket       = "your-learning-tfstate-bucket"
+key          = "platform/uat/terraform.tfstate"
+region       = "ap-southeast-1"
+encrypt      = true
+use_lockfile = true
+~~~
+
+Bootstrap bucket ngoài stack cần state bucket; bật versioning, encryption, Block Public Access, TLS-only policy và least-privilege access.
+
+## 9. IAM least-privilege checklist
+
+- CI principal chỉ assume đúng deployment role.
+- Trust policy giới hạn source identity/repository/project/ref/audience.
+- Deployment role giới hạn actions/resources phù hợp stack.
+- Backend policy tách `ListBucket` (prefix condition) và object read/write trên state key.
+- KMS permissions chỉ với key cụ thể.
+- Deny Production apply nếu không qua protected environment/approved pipeline.
+- Temporary credentials; không echo token.
+- Audit bằng CloudTrail và CI logs.
+
+## 10. Runner operations với ECS/Fargate
+
+UAT v1.6 mô tả runner manager/worker tasks, ECR images, SSM Parameter Store cho registration token, CloudWatch Log Groups, ECS cluster/services và Security Group cho manager-worker connectivity.
+
+Trước update runner infrastructure: kiểm tra pipeline đang chạy; drain runner; xác nhận active worker tasks = 0; update image/task definition/service; kiểm tra registration và test job; enable lại runner; theo dõi CloudWatch logs.
+
+## 11. Troubleshooting
+
+| Symptom | Nguyên nhân có thể | Cách xử lý |
 |---|---|---|
-| AWS managed service | Giảm vận hành hạ tầng | Feature fit, quotas, limits, pricing |
-| Self-managed on EC2/container | Cần OS/runtime/customization | Patching, HA, scaling, backup, operations |
-| Alternative AWS service | Workload khác về latency/scale/governance | Fit, migration effort, integration, cost |
+| AccessDenied khi assume role | Trust policy, OIDC claims, ExternalId sai | Kiểm tra caller identity, `sub`, `aud`, role ARN |
+| No credentials | Runner thiếu identity/session | Kiểm tra OIDC token hoặc task role |
+| Terraform state lock | Job khác đang apply hoặc lock stale | Xác minh process; không force-unlock mù |
+| Plan ngoài mong đợi | Wrong workspace/vars/backend/account | Log account, workspace, backend key, var file |
+| Missing plan artifact | Artifact expired/dependency sai | Giữ artifact đủ lâu và bind đúng job |
+| TFLint fail | Provider/module rule hoặc syntax | Pin plugin/version và xử lý findings |
+| Trivy findings | IaC misconfiguration | Review severity/context, documented exception |
+| Runner offline | ECS task, token, network hoặc ECR issue | ECS events, CloudWatch, SSM, connectivity |
 
-## 6. Prerequisites
-- AWS learning account riêng, MFA và budget/billing alert.
-- AWS CLI v2 và identity dùng temporary credentials.
-- Git và Python/Docker/Terraform nếu lab cần.
-- Synthetic dataset; không dùng dữ liệu khách hàng hoặc thông tin nội bộ.
-- Xác nhận Region, quota, service availability và IAM permissions.
+## 12. Rollback và recovery
 
-## 7. Hands-on labs
-| Lab | Nội dung | Status |
-|---|---|---|
-| Lab 01 | Prepare account, identity, variables and prerequisites | Planned |
-| Lab 02 | Build the minimum architecture | Planned |
-| Lab 03 | Implement the main workflow | Planned |
-| Lab 04 | Validate output and failure cases | Planned |
-| Lab 05 | Observe, secure, estimate cost and clean up | Planned |
+Terraform infrastructure rollback thường là corrective commit và plan/apply mới, không tự động đảo ngược mọi thay đổi. Giữ Git history và artifacts gắn commit. Với destructive change, review replacement/destroy, backup và recovery trước. Tách database migration rollback khỏi infra deployment rollback.
 
-Mỗi lab hoàn chỉnh phải có mục tiêu, prerequisites, Console steps và screenshots, CLI/SDK code, Terraform nếu phù hợp, expected output, troubleshooting, rollback, cost và cleanup.
+## 13. Knowledge check
 
-## 8. Code and infrastructure
-Mã nguồn thực hành được tổ chức trong `usecases/UC09/`:
-- `src/`: runnable Python/SQL/shell source.
-- `config/`: safe examples và `.env.example` (không lưu secrets thật).
-- `infrastructure/terraform/`: infrastructure có thể tái triển khai.
-- `tests/`: unit, integration và data validation tests.
-- `diagrams/`: Mermaid/Draw.io source và exported images.
+1. OIDC khác access key tĩnh thế nào?
+2. `AssumeRole` và `AssumeRoleWithWebIdentity` khác nhau ở đâu?
+3. Vì sao target role phải giới hạn Principal và Condition?
+4. `ExternalId` giải quyết rủi ro nào?
+5. Terraform state cần controls gì?
+6. Vì sao phải review Plan trước Apply?
+7. Làm sao bảo đảm Apply đúng plan đã duyệt?
+8. Vì sao workspace không phải security boundary?
+9. Tại sao không chạy untrusted PR với AWS credentials?
+10. Vì sao update ECS GitLab Runner cần kiểm tra active worker jobs?
 
-## 9. Security, cost and cleanup
-- Least-privilege IAM; không hard-code credentials.
-- Encryption và secrets management phù hợp với phân loại dữ liệu.
-- Chỉ dùng synthetic data; ghi rõ retention và access.
-- Ghi Region, assumptions, pricing dimensions và ngày kiểm tra.
-- Có teardown cụ thể và xác minh tài nguyên đã được xóa.
-- Không chạy destructive commands ngoài learning environment riêng.
+## 14. Official references
 
-## 10. Troubleshooting and operations
-Tạo bảng symptom → likely cause → diagnostic → remediation. Bổ sung CloudWatch logs/metrics, audit trail, retry behavior, alert routing và recovery checks khi phù hợp.
+- [GitHub OIDC in AWS](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
+- [GitLab AWS OIDC](https://docs.gitlab.com/ci/cloud_services/aws/)
+- [IAM role trust policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_manage_modify.html)
+- [AWS STS AssumeRole](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html)
+- [Terraform S3 backend](https://developer.hashicorp.com/terraform/language/backend/s3)
+- [Terraform workspaces](https://developer.hashicorp.com/terraform/cli/workspaces)
+- [GitHub Actions environments](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment)
+- [GitLab CI/CD environments](https://docs.gitlab.com/ci/environments/)
+- [Trivy IaC scanning](https://trivy.dev/latest/docs/target/misconfiguration/)
+- [TFLint](https://github.com/terraform-linters/tflint)
 
-## 11. Knowledge check
-- [ ] Trả lời đủ 10 WH cho từng AWS service.
-- [ ] So sánh service chính với ít nhất hai alternatives khả thi khi phù hợp.
-- [ ] Giải thích architecture, data flow và security boundaries.
-- [ ] Reproduce lab từ môi trường sạch.
-- [ ] Chẩn đoán ít nhất một failure được chủ động tạo ra.
-- [ ] Ước tính chi phí và hoàn thành teardown.
+## 15. Acceptance criteria
 
-## 12. Official references
-- [AWS Architecture Center](https://aws.amazon.com/architecture/)
-- [AWS Documentation](https://docs.aws.amazon.com/)
-- [AWS Pricing Calculator](https://calculator.aws/)
-
-Bổ sung service-specific official docs, quotas/limits, pricing links và ngày kiểm tra khi triển khai lab.
+- [ ] PR pipeline chạy format/validate/tests.
+- [ ] CI lấy AWS temporary credentials, không commit access keys.
+- [ ] Trust policy scoped theo repository/project/environment.
+- [ ] Plan artifact được giữ an toàn và review.
+- [ ] Apply cần protected approval cho environment mục tiêu.
+- [ ] Audit record xác định principal, commit và resources changed.
+- [ ] Runner maintenance không interrupt jobs đang chạy.
+- [ ] Cleanup và recovery được mô tả.
