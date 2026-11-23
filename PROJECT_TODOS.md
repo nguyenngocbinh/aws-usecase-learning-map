@@ -137,3 +137,20 @@ Each use case must contain: business scenario, prerequisites, architecture, data
 - [ ] Verify Terraform plan/apply/destroy in the selected Region.
 - [ ] Verify cost and cleanup after execution.
 - [ ] Mark UC01 Lab verified only after the above checks pass.
+
+
+## UAT v1.6 reference conversion — 2026-11-23
+
+- [x] Read AWS UAT deployment guide v1.6 and map chapters/pages to the learning map.
+- [x] Add sanitized multi-account Data Platform reference architecture (DataSync, VPC Endpoints, S3, Glue, Lake Formation, MWAA, SageMaker, CI/CD).
+- [x] Expand UC02 with Athena Workgroup, Glue Catalog/Crawler/ETL, Lake Formation, Parquet/CTAS, cost, troubleshooting and cleanup.
+- [x] Expand UC09 with Terraform Plan/Compliance/Deploy lifecycle, GitHub OIDC, GitLab CI, remote state, approval and ECS Runner operations.
+- [x] Expand S3 and Athena service guides with 10 WH, alternatives and hands-on guidance.
+- [x] Add UAT chapter-to-use-case mapping and a guided learning path.
+- [x] Add navigation entries for new guides.
+- [ ] Run `mkdocs build --strict` and fix all navigation/Markdown issues.
+- [ ] Verify all commands and code in a dedicated AWS learning account.
+- [ ] Add redacted screenshots and execution evidence.
+- [ ] Validate cost assumptions and cleanup in the selected Region.
+
+**Security note:** Public repository content must not contain actual account IDs, ARNs, private GitLab URLs, network identifiers, tokens, credentials, or customer data from the source document.
