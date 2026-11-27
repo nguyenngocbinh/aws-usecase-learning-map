@@ -1,6 +1,6 @@
 # AWS Service Catalog
 
-Danh mục dịch vụ sẽ được mở rộng theo use case. Mỗi service guide phải có đủ 10 WH questions, decision criteria, alternatives, architecture examples, pricing drivers, operational limits, and official references.
+Danh mục kiến thức dịch vụ AWS. Mỗi service guide phân tích theo 10 WH questions, decision criteria, alternatives, architecture examples, pricing drivers, operational limits và official references. Bộ 10 WH chỉ áp dụng tại đây và các trang AWS knowledge/fundamentals; không áp dụng cho use case.
 
 ## New detailed guides
 
