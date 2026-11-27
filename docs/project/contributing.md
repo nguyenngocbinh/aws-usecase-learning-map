@@ -3,7 +3,8 @@
 ## Content standards
 
 - Vietnamese explanations with official English service names.
-- Use consistent headings: Scenario, Objectives, Architecture, Service Selection, Alternatives, Prerequisites, Hands-on, Validation, Troubleshooting, Security, Cost, Cleanup, Knowledge Check.
+- Use case pages follow a practical implementation structure: Business Scenario, Objectives, Architecture, Scope/Service Selection, Prerequisites, Hands-on Steps, Validation, Troubleshooting, Security, Cost, Cleanup, and Knowledge Check.
+- Do not add WH-question sections to use case pages. Reserve the 10-question WH framework for AWS knowledge/service concept pages.
 - Use Mermaid for editable flow diagrams and Draw.io for detailed AWS architecture diagrams.
 - Every external visual must have reuse permission and attribution recorded in the asset register.
 - Link claims about service behavior to official AWS documentation.
