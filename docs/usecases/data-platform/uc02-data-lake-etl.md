@@ -55,7 +55,7 @@ Raw giữ dữ liệu ingest gốc; Prepared chuẩn hóa/schema; Curated phục
 
 ## 4. Thành phần AWS sử dụng
 
-Use case xây dựng data lake trên S3, đăng ký metadata bằng Glue Data Catalog, xử lý bằng Glue ETL và truy vấn bằng Athena. Các mô tả dưới đây chỉ tập trung vào vai trò và cấu hình trong workflow; kiến thức tổng quan theo 10 WH nằm trong AWS Knowledge Base.
+Use case xây dựng data lake trên S3, đăng ký metadata bằng Glue Data Catalog, xử lý bằng Glue ETL và truy vấn bằng Athena. Các mô tả dưới đây chỉ tập trung vào vai trò và cấu hình trong workflow. Kiến thức tổng quan về từng AWS service được trình bày riêng tại AWS Knowledge Base.
 
 ### 4.1 Amazon S3
 
