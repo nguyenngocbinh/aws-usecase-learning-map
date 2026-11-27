@@ -55,6 +55,8 @@ mkdocs build --strict
 4. Document estimated cost, region assumptions, cleanup, and resource deletion for every billable lab.
 5. Deploy to an isolated learning account; do not reuse bank or production environments.
 
-## Learning standard
+## Content standards
 
-Every AWS service page must answer the 10 WH questions: What, Why, When, Where, Who, Which, How, How much, What if, and How compared. Every use case must include architecture, alternatives, hands-on steps, code, validation, troubleshooting, security, cost, cleanup, and knowledge checks.
+- **AWS knowledge pages:** use the 10-question WH framework (What, Why, When, Where, Who, Which, How, How much, What if, How compared) to explain AWS concepts and services.
+- **Use case pages:** focus on the business scenario, objectives, architecture, prerequisites, implementation steps, code, validation, troubleshooting, security, cost, and cleanup. Do not add WH question sections.
+- Vietnamese explanations; keep code, commands, and technical terms in English.
