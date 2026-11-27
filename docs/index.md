@@ -14,7 +14,7 @@ Từ nền tảng dữ liệu đến Machine Learning, CI/CD và vận hành pro
 </div>
 
 <div class="hero-meta">
-  <span>12 USE CASES</span><span>5 LEARNING DOMAINS</span><span>HANDS-ON FIRST</span>
+  <span>13 USE CASES</span><span>5 LEARNING DOMAINS</span><span>HANDS-ON FIRST</span>
 </div>
 </div>
 
@@ -26,7 +26,7 @@ Từ nền tảng dữ liệu đến Machine Learning, CI/CD và vận hành pro
 <span class="domain-index">A / 01–03</span>
 <h3>Data Platform</h3>
 <p>Đưa dữ liệu lên AWS, xây Data Lake, ETL và migration database.</p>
-<strong>3 use cases</strong><br>
+<strong>4 use cases</strong><br>
 [Khám phá Data Platform →](usecases/data-platform/uc01-upload-data.md)
 </div>
 
@@ -63,6 +63,10 @@ Từ nền tảng dữ liệu đến Machine Learning, CI/CD và vận hành pro
 </div>
 
 </div>
+
+## Use case mới
+
+- [UC13 — Amazon Athena: Truy vấn dữ liệu trực tiếp trên S3 bằng SQL](usecases/data-platform/uc13-athena-s3-sql.md)
 
 ## Learning path
 
