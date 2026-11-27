@@ -46,6 +46,23 @@ Không paste access key vào terminal history, notebook hoặc repository.
 - Ghi rõ runtime dự kiến; tắt/xóa endpoint, database, NAT Gateway và tài nguyên tính phí theo giờ khi không sử dụng.
 - Kiểm tra chi phí thực tế trong Billing/Cost Explorer; free tier không đồng nghĩa mọi thành phần đều miễn phí.
 
+## 10 WH — khung câu hỏi học AWS
+
+Áp dụng bộ câu hỏi này khi tìm hiểu từng AWS service hoặc concept. Không đưa bộ câu hỏi này vào các trang use case.
+
+| Câu hỏi | Nội dung cần tìm hiểu |
+|---|---|
+| What | Dịch vụ/khái niệm là gì? Capability và giới hạn cốt lõi? |
+| Why | Giải quyết vấn đề nào? Giá trị và lý do sử dụng? |
+| When | Khi nào nên dùng và trường hợp nào không phù hợp? |
+| Where | Hoạt động ở phạm vi Region/AZ/account/network nào? |
+| Who | Ai sử dụng, vận hành và principal nào cần quyền? |
+| Which | Nên chọn service, mode, tier hoặc configuration nào? |
+| How | Cách hoạt động, triển khai và tích hợp ra sao? |
+| How much | Pricing dimensions, cost drivers và cách ước tính? |
+| What if | Failure modes, limits, security risks và recovery? |
+| How compared | Khác gì với alternatives; trade-offs và tiêu chí lựa chọn? |
+
 ## Checklist
 
 - [ ] MFA đã bật cho identity quản trị.
