@@ -72,75 +72,32 @@ s3://<bucket-name>/
 
 Không đưa account ID, customer identifier thật hoặc dữ liệu nhạy cảm vào tên bucket/key. Dùng prefix nhất quán để hỗ trợ downstream ETL.
 
-## 4. Service selection — 10 WH cho từng thành phần
+## 4. Thành phần AWS sử dụng
+
+Use case này tập trung vào luồng upload file lên Amazon S3. Phần giải thích khái niệm chuyên sâu về S3, IAM, CLI/SDK, KMS và CloudTrail thuộc AWS Knowledge Base.
 
 ### 4.1 Amazon S3
 
-| WH | Giải thích |
-|---|---|
-| What | Object storage lưu dữ liệu dưới dạng object trong bucket, phù hợp file, backup, data lake và artifact. |
-| Why | Durable, scale lớn, tích hợp AWS analytics/ML, tách storage khỏi compute. |
-| When | Dùng cho file/object, data lake, log, backup; không dùng như POSIX filesystem hoặc database transaction engine. |
-| Where | Bucket thuộc một AWS Region; kiểm tra availability và data residency trước khi chọn Region. |
-| Who | IAM roles/users, workload roles, bucket policies, access points và AWS services được cấp quyền. |
-| Which | Chọn storage class theo access pattern; Standard cho truy cập thường xuyên, IA/Glacier cho dữ liệu ít truy cập và retention phù hợp. |
-| How | Console, AWS CLI, SDK/Boto3, S3 API hoặc IaC. File lớn có thể dùng multipart upload. |
-| How much | GB-month, request, retrieval, data transfer, replication và storage class minimum/transition constraints. |
-| What if | Xử lý AccessDenied, bucket policy deny, Region mismatch, KMS permission, incomplete multipart, overwrite/versioning và quota. |
-| How compared | S3 là object storage; EBS là block storage; EFS/FSx là file storage. Chọn theo protocol và access pattern. |
-
-Official: [S3 User Guide](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html) · [S3 pricing](https://aws.amazon.com/s3/pricing/).
+- **Vai trò:** lưu trữ file nguồn dưới dạng object trong bucket.
+- **Cấu hình sử dụng:** private bucket, prefix theo source/date, Block Public Access, default encryption, Versioning và Lifecycle khi phù hợp.
+- **Thao tác chính:** tạo bucket, upload object, kiểm tra object metadata và xác minh nội dung.
 
 ### 4.2 IAM
 
-| WH | Giải thích |
-|---|---|
-| What | Dịch vụ quản lý identity, authentication và authorization cho AWS resources. |
-| Why | Kiểm soát principal nào được gọi API nào trên resource nào. |
-| When | Mọi workload cần quyền có kiểm soát; dùng role cho workload và federation cho người dùng/CI. |
-| Where | IAM là global service; identity/resource policies được đánh giá khi request tới dịch vụ. |
-| Who | Human identities, IAM roles, AWS services, federated principals và external identities. |
-| Which | Ưu tiên IAM Identity Center/federation, role và temporary credentials; tránh access key dài hạn. |
-| How | Identity/resource policies, trust policy, permission boundary, SCP và condition keys. |
-| How much | IAM core features không có phí riêng; các dịch vụ liên quan cần kiểm tra pricing/edition. |
-| What if | Kiểm tra identity policy, bucket policy, SCP, permissions boundary, session policy, explicit deny và KMS key policy. |
-| How compared | Role/federation cấp temporary credentials; IAM user access key là long-lived credential cần quản trị vòng đời. |
+- **Vai trò:** xác thực learner/workload và giới hạn quyền upload.
+- **Quyền chính:** `s3:PutObject` trên prefix đích; `s3:ListBucket` với prefix condition khi cần; quyền KMS tương ứng nếu dùng SSE-KMS.
+- **Nguyên tắc:** ưu tiên IAM Identity Center/temporary credentials hoặc role; không hard-code access key.
 
-Official: [IAM best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html) · [Policy evaluation](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html).
+### 4.3 AWS CLI và Python Boto3
 
-### 4.3 AWS CLI và Boto3
-
-| WH | AWS CLI v2 | Python Boto3 |
-|---|---|---|
-| What | Command-line interface gọi AWS APIs. | Python SDK cho AWS APIs. |
-| Why | Tốt cho thao tác nhanh, shell script và automation. | Tốt cho ETL, validation, retry và tích hợp Python. |
-| When | Upload thủ công, kiểm tra bucket/object, CI step. | Pipeline, ứng dụng và xử lý logic phức tạp. |
-| Where | Máy local, runner CI hoặc cloud shell. | Python runtime local, EC2, Lambda, container hoặc notebook. |
-| Who | Người vận hành/developer có AWS identity. | Application role hoặc developer identity. |
-| Which | AWS CLI v2 với profile/SSO phù hợp. | Boto3 với credential provider chain mặc định. |
-| How | aws s3 cp, aws s3api, aws sts. | boto3.client("s3"), upload_file, head_object. |
-| How much | Không thu phí riêng cho CLI; AWS API/resource usage có thể tính phí. | SDK không thu phí riêng; AWS API/resource usage có thể tính phí. |
-| What if | Profile/Region sai, token hết hạn, permission denied, throttling. | Credentials, Region, botocore exceptions, retry, timeout và multipart. |
-| How compared | CLI gọn cho thao tác; SDK linh hoạt để nhúng vào ứng dụng và test. | SDK cần quản lý code/dependencies nhưng kiểm soát flow tốt hơn. |
-
-Official: [AWS CLI S3](https://docs.aws.amazon.com/cli/latest/reference/s3/) · [Boto3 S3 upload](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-uploading-files.html).
+- **AWS CLI:** upload và kiểm tra object từ terminal (`aws s3 cp`, `aws s3api head-object`).
+- **Boto3:** tích hợp upload vào Python application/ETL, xử lý exception và retry.
+- Cả hai sử dụng credential provider chain, không ghi credentials vào source code.
 
 ### 4.4 KMS và CloudTrail
 
-| WH | AWS KMS | AWS CloudTrail |
-|---|---|---|
-| What | Managed key service tạo/quản lý cryptographic keys. | Dịch vụ ghi nhận hoạt động API và sự kiện tài khoản. |
-| Why | Quản trị key lifecycle, key policy và audit việc sử dụng key. | Điều tra principal thực hiện API action, thời điểm và nguồn. |
-| When | SSE-KMS khi cần customer-managed key, key policy hoặc audit/control cụ thể. | Audit; bật S3 data events khi cần object-level API events. |
-| Where | Key thuộc Region; multi-Region key có đặc tính riêng. | Trail/event data có thể lưu ở S3 và/hoặc CloudWatch Logs. |
-| Who | IAM principals được key policy/grants cho phép. | Account admins, security/audit roles và delegated admins. |
-| Which | SSE-S3 hoặc SSE-KMS tùy control requirement. | Management events và data events có selector/cost khác nhau. |
-| How | Key policy, grants, rotation, encryption context và S3 SSE-KMS. | Trail/event data store, selectors, destination, retention và query. |
-| How much | KMS key/month, API requests và tính năng liên quan. | Event volume, data events và CloudTrail Lake usage. |
-| What if | AccessDenied do key policy/IAM/grant; key disabled/deleted; Region mismatch. | Selector không match bucket/prefix, event chưa bật, delivery delay hoặc cost tăng. |
-| How compared | SSE-S3 đơn giản; SSE-KMS cho key governance/audit. | Management events khác data events; object-level logging có thể tăng chi phí. |
-
-Official: [S3 encryption](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingEncryption.html) · [CloudTrail S3 data events](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/logging-data-events-with-cloudtrail.html).
+- **KMS:** chỉ sử dụng SSE-KMS khi cần customer-managed key hoặc key governance; nếu không, đánh giá SSE-S3.
+- **CloudTrail:** bật S3 data events khi use case yêu cầu audit object-level API activity; cân nhắc chi phí event.
 
 ## 5. Alternatives — chọn đúng storage/transfer service
 
