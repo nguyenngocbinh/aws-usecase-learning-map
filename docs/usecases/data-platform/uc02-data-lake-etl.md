@@ -53,82 +53,38 @@ s3://<data-bucket>/
 
 Raw giữ dữ liệu ingest gốc; Prepared chuẩn hóa/schema; Curated phục vụ analytics. Athena results cần prefix riêng, encryption và lifecycle.
 
-## 4. Thành phần và 10 WH
+## 4. Thành phần AWS sử dụng
+
+Use case xây dựng data lake trên S3, đăng ký metadata bằng Glue Data Catalog, xử lý bằng Glue ETL và truy vấn bằng Athena. Các mô tả dưới đây chỉ tập trung vào vai trò và cấu hình trong workflow; kiến thức tổng quan theo 10 WH nằm trong AWS Knowledge Base.
 
 ### 4.1 Amazon S3
 
-| WH | Nội dung |
-|---|---|
-| What | Object storage lưu object trong bucket. |
-| Why | Data Lake storage tách rời compute, scale và tích hợp Glue/Athena. |
-| When | Landing, raw/curated files, logs, artifacts; không thay database transaction. |
-| Where | Chọn Region theo data residency, availability và latency. |
-| Who | IAM roles, workload roles, bucket policies, access points. |
-| Which | Standard, Intelligent-Tiering, IA, Glacier theo access/retention và minimum duration. |
-| How | Console, CLI, SDK, DataSync và Terraform. |
-| How much | Storage, requests, retrieval, transfer, lifecycle, replication, KMS. |
-| What if | AccessDenied, wrong prefix, overwrite, versioning, incomplete multipart, KMS errors. |
-| How compared | S3 object; EBS block; EFS/FSx file; DataSync transfer. |
+- Lưu dữ liệu theo các zone/prefix như Raw, Prepared và Curated.
+- Dùng partition theo business/date phù hợp; ưu tiên Parquet cho dữ liệu phân tích sau bước chuẩn hóa.
+- Thiết lập encryption, bucket policy và lifecycle theo yêu cầu lưu trữ.
 
 ### 4.2 AWS Glue
 
-| WH | Nội dung |
-|---|---|
-| What | Serverless data integration gồm Data Catalog, Crawlers và ETL Jobs. |
-| Why | Discovery metadata, schema cataloging, transform và data preparation. |
-| When | Batch ETL, format conversion, schema normalization. |
-| Where | Job, Catalog, connections và target data cần xét Region/network boundaries. |
-| Who | Data Engineer, Glue service role, Catalog admin và data consumer. |
-| Which | Visual/Script ETL, Spark/Python Shell theo workload; Glue version/worker theo dependency và scale. |
-| How | IAM role, script, job, parameters, connection, trigger và monitoring. |
-| How much | Worker/DPU runtime, crawler/catalog usage, data transfer và features. |
-| What if | Timeout, schema mismatch, permission, dependency, skew, small files, bookmark issues. |
-| How compared | Glue managed ETL; EMR cho Spark/Hadoop control; Lambda cho event nhỏ; Step Functions orchestration. |
+- Chạy ETL Job để đọc dữ liệu nguồn, chuẩn hóa schema, xử lý chất lượng dữ liệu và ghi output về S3.
+- Cấu hình Glue version, worker type/number, IAM role, job parameters và retry phù hợp với workload.
+- Theo dõi Job runs, logs và metrics để xử lý lỗi.
 
 ### 4.3 Glue Data Catalog và Crawler
 
-| WH | Nội dung |
-|---|---|
-| What | Metadata catalog gồm database, table, schema, partition và location. |
-| Why | Cung cấp metadata cho Athena/Glue/analytics engines. |
-| When | Cần schema discovery/metadata sharing cho S3 datasets. |
-| Where | Catalog có Region scope; cross-account sharing cần thiết kế riêng. |
-| Who | Catalog admins, crawler role, ETL roles, Athena users. |
-| Which | Crawler tự discovery; DDL/Glue API cho schema governance chặt hơn. |
-| How | Chọn S3 target, IAM role, database, schedule rồi chạy crawler hoặc DDL/API. |
-| How much | Kiểm tra crawler runtime, catalog requests và feature pricing. |
-| What if | Crawler tạo table sai, schema drift, duplicate table, partition không refresh. |
-| How compared | Catalog là metadata; S3 là data; Lake Formation là permissions; Athena là query engine. |
+- Catalog lưu metadata database/table/schema/location để Athena và Glue tham chiếu.
+- Crawler discovery schema/partition từ S3; dùng DDL hoặc Glue API khi cần kiểm soát schema chặt hơn.
+- Xác minh table location và partition sau khi crawler chạy.
 
 ### 4.4 Lake Formation
 
-| WH | Nội dung |
-|---|---|
-| What | Dịch vụ quản trị quyền truy cập Data Lake trên Data Catalog/S3. |
-| Why | Centralized fine-grained permissions cho database/table/column và các control được hỗ trợ. |
-| When | Nhiều producer/consumer hoặc cần governance tập trung. |
-| Where | Cấu hình theo account/Region và registered data locations. |
-| Who | Data lake admins, data owners, principals, service roles. |
-| Which | IAM-only hay Lake Formation permissions; hiểu hybrid access mode nếu dùng. |
-| How | Register S3 location, grant database/table permissions, cấu hình admins. |
-| How much | Xác minh pricing hiện hành; còn có S3/Glue/Athena/KMS costs. |
-| What if | IAM allow nhưng Lake Formation deny, resource link sai, location chưa register hoặc role thiếu quyền. |
-| How compared | IAM quản API/identity; S3 policy bảo vệ object; Lake Formation cấp data permissions qua integrated services. |
+- Quản trị data permissions tập trung trên Data Catalog và các data location đã đăng ký.
+- Chỉ cấu hình khi use case cần centralized/fine-grained governance; làm rõ tương tác giữa IAM permissions và Lake Formation grants.
 
 ### 4.5 Amazon Athena
 
-| WH | Nội dung |
-|---|---|
-| What | Serverless SQL query service đọc dữ liệu từ S3. |
-| Why | Query nhanh mà không cần vận hành cluster. |
-| When | Ad-hoc analytics, exploration, reconciliation, data quality; không dùng làm OLTP. |
-| Where | Query chạy trong Region; S3 source/result và Catalog cần phù hợp. |
-| Who | IAM principal cần Athena, Glue, S3, KMS và có thể Lake Formation. |
-| Which | Workgroup, engine version, output location, encryption, format và partition. |
-| How | DDL/CTAS, Console, CLI, SDK, JDBC/ODBC. |
-| How much | Pricing theo bytes scanned theo mô hình phổ biến; cộng S3, Glue, KMS, transfer. |
-| What if | AccessDenied, malformed data, wrong location, missing partitions, timeout, scan lớn. |
-| How compared | Athena serverless query; Redshift warehouse; Glue ETL; EMR Spark; RDS/SQL Server OLTP. |
+- Truy vấn dữ liệu trực tiếp trên S3 bằng SQL thông qua metadata trong Glue Data Catalog.
+- Cấu hình Workgroup, query result location, encryption và giới hạn bytes scanned khi phù hợp.
+- Tối ưu bằng Parquet, compression và partition pruning.
 
 ## 5. Alternatives và decision matrix
 
@@ -417,18 +373,16 @@ flowchart LR
 
 `DROP TABLE` thường chỉ xóa metadata; xác minh bucket/prefix trước khi delete objects. Không dùng production identifiers trong cleanup.
 
-## 16. Knowledge check — 10 câu hỏi
+## 16. Knowledge check
 
-1. Data Catalog khác S3 ở điểm nào?
-2. Dùng Crawler khi nào, khi nào nên dùng explicit schema?
-3. Glue Job role cần quyền gì để đọc Raw và ghi Prepared?
-4. Lake Formation grant khác IAM policy ra sao?
-5. Vì sao Athena query result location cần cấu hình riêng?
-6. CSV khác Parquet về scan behavior như thế nào?
-7. Partitioning giúp query nhanh hơn trong trường hợp nào?
-8. Vì sao S3 event → SQS → Lambda cần idempotency?
-9. Khi nào chọn Glue Workflow, Step Functions hoặc MWAA?
-10. Chi phí UC02 gồm những thành phần nào ngoài Athena query?
+- [ ] Trình bày được mục tiêu, phạm vi và điều kiện đầu vào của use case.
+- [ ] Giải thích được architecture, các thành phần và data flow.
+- [ ] Triển khai lại được lab theo hướng dẫn từ môi trường sạch.
+- [ ] Xác minh output bằng expected results hoặc validation queries.
+- [ ] Thực hiện được ít nhất một negative test và giải thích cách xử lý lỗi.
+- [ ] Kiểm tra IAM permissions, encryption và các security controls liên quan.
+- [ ] Ước tính các cost drivers và hoàn thành cleanup.
+
 
 ## 17. Acceptance criteria
 
