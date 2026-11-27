@@ -84,10 +84,11 @@ s3://<bucket-name>/
 s3://<bucket-name>/raw/loan_demo/sample_loans.csv
 ```
 
-<figure markdown>
-  ![Minh họa cấu trúc prefix của S3 bucket cho Athena](../assets/images/uc13-athena-s3-layout.svg)
-  <figcaption>Hình 1 — Cấu trúc S3: raw data và query results được tách riêng.</figcaption>
-</figure>
+**Ảnh giao diện AWS Console:** thao tác upload file được minh họa trong [hướng dẫn chính thức của Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/upload-objects.html). Các bước trên Console là **Buckets → chọn bucket → Upload → Add files → Upload**.
+
+![AWS S3 Console – Upload objects](https://docs.aws.amazon.com/images/AmazonS3/latest/userguide/upload-objects-console.png)
+
+*Ảnh tham khảo từ AWS Documentation. Giao diện có thể thay đổi theo phiên bản Console.*
 
 ### 3.4. Kiểm tra dữ liệu CSV
 
@@ -129,10 +130,19 @@ s3://<bucket-name>/athena-results/
 3. Bật encryption theo chính sách môi trường (ví dụ SSE-S3 hoặc SSE-KMS).
 4. Lưu cấu hình.
 
-<figure markdown>
-  ![Minh họa cấu hình Athena query result location](../assets/images/uc13-athena-workgroup.svg)
-  <figcaption>Hình 2 — Cấu hình Workgroup và S3 output location trước khi chạy SQL.</figcaption>
-</figure>
+**Ảnh chụp AWS Console – Athena Query editor:** chọn **Edit settings** để khai báo S3 output location.
+
+![Athena Query editor – Edit settings](https://docs.aws.amazon.com/images/athena/latest/ug/images/getting-started-choose-view-settings.png)
+
+Nhập S3 path trong **Location of query result**, sau đó chọn **Save**:
+
+![Athena Manage settings – Query result location](https://docs.aws.amazon.com/images/athena/latest/ug/images/getting-started-setting-results-location.png)
+
+Sau khi lưu, quay lại tab **Editor**:
+
+![Athena Query editor – Editor tab](https://docs.aws.amazon.com/images/athena/latest/ug/images/getting-started-choose-editor.png)
+
+*Ảnh tham khảo từ AWS Documentation. Workgroup settings có thể override cấu hình phía Query editor.*
 
 **Khuyến nghị:** Tạo Workgroup riêng tên `uc13-learning` thay vì dùng `primary` cho các lab dùng chung. Trong Workgroup có thể cấu hình:
 - Query result location và encryption.
@@ -159,6 +169,10 @@ Chạy câu lệnh:
 CREATE DATABASE IF NOT EXISTS uc13_learning;
 ```
 
+Ảnh minh họa Query editor và câu lệnh tạo Database trong [AWS Athena getting started guide](https://docs.aws.amazon.com/athena/latest/ug/step-1-create-a-database.html):
+
+![Athena Query editor – nhập CREATE DATABASE](https://docs.aws.amazon.com/images/athena/latest/ug/images/getting-started-collapse-nav-pane.png)
+
 Sau đó chọn database `uc13_learning` ở panel bên trái hoặc dùng:
 
 ```sql
@@ -180,6 +194,10 @@ Glue Crawler tự đọc một hoặc nhiều data source để suy luận schem
 3. Chọn **Create crawler**.
 
 #### A2. Đặt tên Crawler
+
+![AWS Glue Console – Crawlers page và nút Create crawler](https://docs.aws.amazon.com/images/glue/latest/dg/images/crawlers-create_crawler.png)
+
+*Ảnh tham khảo từ AWS Glue Documentation.*
 
 - Crawler name: `uc13-loan-demo-crawler`.
 - Description: `Discover schema for UC13 Athena CSV lab`.
@@ -237,7 +255,11 @@ Không dùng AdministratorAccess chỉ để chạy lab.
 
 Cách này phù hợp khi đã biết schema, cần kiểm soát data type, SerDe, header và location chính xác.
 
-Trong Athena Query editor, chọn database `uc13_learning`, sau đó chạy:
+Trong Athena Query editor, chọn database `uc13_learning`, sau đó chạy. AWS minh họa thao tác tạo query tab và nhập DDL trong [hướng dẫn Create a table](https://docs.aws.amazon.com/athena/latest/ug/step-2-create-a-table.html):
+
+![Athena Query editor – tạo query tab mới](https://docs.aws.amazon.com/images/athena/latest/ug/images/getting-started-new-query-tab.png)
+
+
 
 ```sql
 CREATE EXTERNAL TABLE IF NOT EXISTS uc13_learning.loan_demo_csv (
