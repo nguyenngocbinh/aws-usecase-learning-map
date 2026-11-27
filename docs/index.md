@@ -128,7 +128,8 @@ flowchart LR
 ## Nguyên tắc nội dung
 
 - Tiếng Việt, giữ nguyên thuật ngữ kỹ thuật tiếng Anh.
-- Mỗi AWS service có 10 câu hỏi WH và so sánh lựa chọn thay thế.
+- **AWS Knowledge Base:** mỗi chủ đề/dịch vụ AWS được phân tích theo bộ 10 câu hỏi WH.
+- **Use case:** tập trung vào tình huống nghiệp vụ, architecture, prerequisites, hands-on steps, validation, troubleshooting, security, cost và cleanup; không sử dụng bộ câu hỏi WH.
 - Sơ đồ có mã nguồn Mermaid/Draw.io; hình có chú thích và nguồn.
 - Lab ưu tiên synthetic data, least privilege, repeatability và cleanup.
 - Chi phí là phần bắt buộc, không mặc định tài nguyên AWS là miễn phí.
