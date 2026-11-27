@@ -91,6 +91,7 @@ nav:
       - UC01 · Upload dữ liệu: usecases/data-platform/uc01-upload-data.md
       - UC02 · Data Lake & ETL: usecases/data-platform/uc02-data-lake-etl.md
       - UC03 · Database Migration: usecases/data-platform/uc03-database-migration.md
+      - UC13 · Athena SQL trên S3: usecases/data-platform/uc13-athena-s3-sql.md
   - B · Machine Learning:
       - UC04 · Model Training: usecases/machine-learning/uc04-model-training.md
       - UC05 · Model API: usecases/machine-learning/uc05-model-api.md
