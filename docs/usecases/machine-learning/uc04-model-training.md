@@ -6,11 +6,16 @@
 Huấn luyện mô hình PD minh họa trên dữ liệu synthetic, lưu artifact và quản lý phiên bản.
 
 ## 2. Learning objectives
-- Giải thích bài toán, dữ liệu đầu vào/đầu ra và yêu cầu vận hành.
-- Đọc và thiết kế được kiến trúc AWS, data flow và trust boundaries.
-- Chọn dịch vụ theo workload, security, availability, operations và cost.
-- Triển khai bằng Console, CLI/SDK và IaC khi phù hợp.
-- Kiểm thử, xử lý lỗi, quan sát hệ thống và dọn dẹp tài nguyên.
+
+Sau khi hoàn thành use case, người học có thể:
+
+- Mô tả business scenario, phạm vi và kết quả cần đạt.
+- Giải thích input, output và data flow của giải pháp.
+- Đọc và điều chỉnh architecture theo yêu cầu của bài toán.
+- Triển khai các bước thực hành bằng AWS Console, CLI/SDK hoặc IaC.
+- Thiết lập IAM permissions theo nguyên tắc least privilege.
+- Kiểm tra kết quả, thực hiện negative tests và xử lý lỗi phổ biến.
+- Ước tính cost drivers, theo dõi vận hành và cleanup tài nguyên.
 
 ## 3. Reference architecture
 ```mermaid
@@ -26,27 +31,15 @@ flowchart LR
 > Sơ đồ này là bản khái niệm. Bản hoàn thiện cần thể hiện VPC/subnet, endpoints, encryption, IAM trust, network path, error handling và service-specific boundaries theo lab thực tế.
 
 ## 4. AWS service selection
-- **Amazon SageMaker AI** — đánh giá vai trò và cấu hình phù hợp trong lab.
-- **S3** — đánh giá vai trò và cấu hình phù hợp trong lab.
-- **ECR** — đánh giá vai trò và cấu hình phù hợp trong lab.
-- **IAM** — đánh giá vai trò và cấu hình phù hợp trong lab.
-- **Model Registry** — đánh giá vai trò và cấu hình phù hợp trong lab.
 
-### 10 WH questions — áp dụng cho từng service
-| WH | Câu hỏi bắt buộc |
-|---|---|
-| What | Dịch vụ là gì, giải quyết capability nào? |
-| Why | Vì sao chọn dịch vụ cho scenario này? |
-| When | Trường hợp nào nên/không nên dùng? |
-| Where | Region, AZ, network placement và availability ra sao? |
-| Who | Ai vận hành, IAM principal nào cần quyền? |
-| Which | Nên chọn mode, tier hoặc configuration nào? |
-| How | Triển khai bằng Console, CLI, SDK và IaC thế nào? |
-| How much | Pricing dimensions và cost drivers là gì? |
-| What if | Failure modes, limits, recovery và troubleshooting? |
-| How compared | So với alternative nào, trade-off ra sao? |
+Chỉ trình bày các dịch vụ thực sự tham gia vào use case. Với mỗi dịch vụ, nêu rõ vai trò trong kiến trúc, cấu hình được sử dụng, quyền IAM liên quan và lý do lựa chọn. Phần giải thích chuyên sâu theo bộ câu hỏi WH được tập trung tại **AWS Knowledge Base / AWS Fundamentals**, không lặp lại trong từng use case.
 
-**Status:** chưa hoàn thành cho đến khi có câu trả lời theo từng dịch vụ và dẫn nguồn AWS chính thức.
+| Thành phần | Vai trò trong use case | Nội dung cần làm rõ |
+|---|---|---|
+| AWS service chính | Cung cấp capability cốt lõi | Cấu hình sử dụng, input/output, giới hạn liên quan |
+| Thành phần tích hợp | Kết nối hoặc điều phối luồng xử lý | Data flow, dependency và failure handling |
+| Security / governance | Kiểm soát truy cập và bảo vệ dữ liệu | IAM principal, policy scope, encryption và audit |
+
 
 ## 5. Alternatives and decision matrix
 | Choice | When to consider | Trade-offs to validate |
@@ -93,7 +86,7 @@ Mã nguồn thực hành được tổ chức trong `usecases/UC04/`:
 Tạo bảng symptom → likely cause → diagnostic → remediation. Bổ sung CloudWatch logs/metrics, audit trail, retry behavior, alert routing và recovery checks khi phù hợp.
 
 ## 11. Knowledge check
-- [ ] Trả lời đủ 10 WH cho từng AWS service.
+- [ ] Trình bày được vai trò và cấu hình của từng AWS service trong use case.
 - [ ] So sánh service chính với ít nhất hai alternatives khả thi khi phù hợp.
 - [ ] Giải thích architecture, data flow và security boundaries.
 - [ ] Reproduce lab từ môi trường sạch.
